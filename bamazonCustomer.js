@@ -59,18 +59,15 @@ function purchase() {
             }
         }
     ]).then(function (answer) {
-        connection.query("SELECT * FROM products", function (err, data) {
+        connection.query("SELECT * FROM products WHERE ?", { id: answer.buyWhat }, function (err, data) {
             if (err) throw err;
-            var choseIDprice;
-            var chosenIDquant;
-            for (let p = 0; p < data.length; p++) {
-                if (data[p].id == answer.buyWhat) {
-                    var chosenIDquant = data[p].stock_quantity;
-                    var choseIDprice = data[p].price;
-                };
-            };
+            var chosenIDsales = Number(data[0].product_sales);
+            var chosenIDprice = data[0].price;
+            var chosenIDquant = data[0].stock_quantity;
             if (answer.howMany < chosenIDquant) {
-                var newQuant = chosenIDquant - answer.howMany;
+                var totalPrice = Number(chosenIDprice) * Number(answer.howMany);
+                var totalSales = Number(chosenIDsales) + Number(totalPrice);
+                var newQuant = Number(chosenIDquant) - Number(answer.howMany);
                 connection.query("UPDATE products SET ? WHERE ?",
                     [
                         {
@@ -83,7 +80,19 @@ function purchase() {
                         if (err) throw err;
                     }
                 );
-                var totalPrice = choseIDprice * answer.howMany;
+                connection.query("UPDATE products SET ? WHERE ?",
+                    [
+                        {
+                            product_sales: totalSales
+                        },
+                        {
+                            id: answer.buyWhat
+                        }
+                    ], function (err) {
+                        if (err) throw err;
+                    }
+                );
+                var totalPrice = chosenIDprice * answer.howMany;
                 console.log("Your transaction was successfull! \n" + "You total today comes to $" + totalPrice);
                 inquirer.prompt([
                     {

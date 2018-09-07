@@ -198,7 +198,8 @@ function newProduct() {
                 product_name: answer.anotherProductname,
                 department_name: answer.anotherProductdepartment,
                 price: answer.anotherProductprice,
-                stock_quantity: answer.anotherProductstock
+                stock_quantity: answer.anotherProductstock,
+                product_sales: 0
             })
         console.log("New Product Added!");
         end();
